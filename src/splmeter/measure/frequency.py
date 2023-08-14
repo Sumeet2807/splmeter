@@ -5,19 +5,32 @@ import numpy as np
 
 from typing import Any
 
-def tofrequencydomain(signal,sample_rate,duration,start=0):
-        start_sample = start*sample_rate
+def tofrequencydomain(signal,sample_rate):
+        # start_sample = start*sample_rate
         spectrum = []
-        for i in range(duration):
-            a = start_sample + (i*sample_rate)
-            b = a + sample_rate
-            if b > signal.shape[0]:
-                break
-            yf = fft(signal[a:b])
+
+        for a in range(sample_rate,signal.shape[0]+1,sample_rate):
+             
+            b = a - sample_rate
+            yf = fft(signal[b:a])
             N = sample_rate
             yf = 2.0/N * np.abs(yf[0:N//2])
 
             spectrum.append(yf)
+
+
+
+
+        # for i in range(duration):
+        #     a = start_sample + (i*sample_rate)
+        #     b = a + sample_rate
+        #     if b > signal.shape[0]:
+        #         break
+        #     yf = fft(signal[a:b])
+        #     N = sample_rate
+        #     yf = 2.0/N * np.abs(yf[0:N//2])
+
+        #     spectrum.append(yf)
 
         
         T = 1/sample_rate
@@ -30,9 +43,9 @@ def log_rms(data):
 
 class OneThirdOctave():
 
-    def __init__(self,processing: list=[]):
-
-        self.processings = processing
+    def __init__(self,reference_pressure = 2.0e-5):
+        self.reference_pressure = reference_pressure
+        # self.processings = processing
         self.bins = [
                     14.1,
                     17.8,
@@ -104,13 +117,13 @@ class OneThirdOctave():
                             20000,
                             ]
 
-    def __call__(self, signal: ndarray, sample_rate: int, duration: int, start: int=0,reference_pressure = 2.0e-5) -> Any:
+    def __call__(self, signal: ndarray, sample_rate: int) -> Any:
     
-        for processing in self.processings:
-            signal = processing(signal)
+        # for processing in self.processings:
+        #     signal = processing(signal)
 
-        spectrum, frequencies = tofrequencydomain(signal,sample_rate,duration,start=start)
+        spectrum, frequencies = tofrequencydomain(signal,sample_rate)
         bin_stats, bin_edges, binnumber = binned_statistic(frequencies,spectrum,statistic=log_rms,bins=self.bins)
-        freq_data = (20*np.log10(bin_stats/reference_pressure)).T
+        freq_data = (20*np.log10(bin_stats/self.reference_pressure)).T
         return freq_data
     
