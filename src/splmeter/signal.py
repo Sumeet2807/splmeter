@@ -2,16 +2,14 @@ from splmeter.base import BaseSignal
 
 
 class SoundPressure(BaseSignal):
-    def __init__(self):
-        super().__init__()
-        self.sigtype = 'pressure'
+    def init(self):
+        self.type = 'pressure(Pa)'
         self.unit = 'Pa'
 
 
 class SoundLevel(BaseSignal):
-    def __init__(self):
-        super().__init__()
-        self.sigtype = 'level'
+    def init(self):        
+        self.type = 'level(dB)'
         self.unit = 'dB'
 
     

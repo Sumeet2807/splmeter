@@ -3,10 +3,8 @@ from scipy.signal import zpk2tf,lfilter, bilinear
 from numpy import pi, polymul
 from numpy import pi
 from scipy.signal import zpk2tf, zpk2sos, freqs, sosfilt
-# from scipy.fft import fft, ifft, fftfreq
-# from scipy.stats import binned_statistic
-# import scipy.integrate as integrate
-# import scipy.special as special
+from splmeter.base import BaseModule, BaseSignal
+from splmeter.signal import SoundPressure, SoundLevel
 import numpy as np
 
 
@@ -116,16 +114,18 @@ def C_weighting(fs, output='ba'):
     
 
 
-class FrequencyWeight():
-    def __init__(self,weighting_type='A'):
+class FrequencyWeight(BaseModule):
+    def init(self,weighting_type='A'):
         if weighting_type == 'A':
             self.weight_fn = A_weighting
         elif weighting_type == 'C':
             self.weight_fn = C_weighting
         else:
             raise Exception('Unsupported weighting type')
+        self.name = 'Frequency Weighting'
+        self.parameters['Weighting Type'] = weighting_type
 
-    def __call__(self,signal,sample_rate):
-        sos = self.weight_fn(sample_rate,output='sos')
-        output = sosfilt(sos, signal)
-        return output
+    def process(self,signal):
+        sos = self.weight_fn(signal.fs,output='sos')
+        signal.amplitude = sosfilt(sos, signal.amplitude)
+        return signal

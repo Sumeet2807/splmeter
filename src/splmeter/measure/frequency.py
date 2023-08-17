@@ -16,21 +16,6 @@ def tofrequencydomain(signal,fs):
             yf = 2.0/N * np.abs(yf[0:N//2])
 
             spectrum.append(yf)
-
-
-
-
-        # for i in range(duration):
-        #     a = start_sample + (i*fs)
-        #     b = a + fs
-        #     if b > signal.shape[0]:
-        #         break
-        #     yf = fft(signal[a:b])
-        #     N = fs
-        #     yf = 2.0/N * np.abs(yf[0:N//2])
-
-        #     spectrum.append(yf)
-
         
         T = 1/fs
         frequencies = fftfreq(fs, T)[:fs//2]
@@ -42,12 +27,32 @@ def log_rms(data):
 
 class OneThirdOctave(BaseModule):
 
-    def __init__(self,reference_pressure = 2.0e-5):
+    def init(self,reference_pressure = 2.0e-5):
         self.name = 'One-Third Octave'
         self.parameters['Reference Pressure'] = reference_pressure
         self.reference_pressure = reference_pressure
-        # self.processings = processing
-        self.bins = [
+        self.bins = OneThirdOctaveBins        
+        self.bin_names = OneThirdOctaveBinNames
+        
+
+
+    def process(self, signal):
+    
+        # for processing in self.processings:
+        #     signal = processing(signal)
+        if not isinstance(signal, SoundPressure):
+             raise Exception('Unsupported signal type. Supported type - splmeter.signal.SoundPressure')
+
+        spectrum, frequencies = tofrequencydomain(signal.amplitude,signal.fs)
+        bin_stats, bin_edges, binnumber = binned_statistic(frequencies,spectrum,statistic=log_rms,bins=self.bins)
+        freq_data = (20*np.log10(bin_stats/self.reference_pressure)).T
+        new_signal =  SoundLevel().from_signal(signal,freq_data,1)
+        return new_signal
+    
+
+
+
+OneThirdOctaveBins = [
                     14.1,
                     17.8,
                     22.4,
@@ -82,8 +87,8 @@ class OneThirdOctave(BaseModule):
                     17780,
                     22390
                     ]
-        
-        self.bin_names = [
+
+OneThirdOctaveBinNames = [
                             16,
                             20,
                             25,
@@ -117,20 +122,3 @@ class OneThirdOctave(BaseModule):
                             16000,
                             20000,
                             ]
-        
-
-
-    def process(self, signal: BaseSignal) -> BaseSignal:
-    
-        # for processing in self.processings:
-        #     signal = processing(signal)
-        if not isinstance(signal, SoundPressure):
-             raise Exception('Unsupported signal type. Supported type - splmeter.signal.SoundPressure')
-
-        spectrum, frequencies = tofrequencydomain(signal.amplitude,signal.fs)
-        bin_stats, bin_edges, binnumber = binned_statistic(frequencies,spectrum,statistic=log_rms,bins=self.bins)
-        freq_data = (20*np.log10(bin_stats/self.reference_pressure)).T
-        new_signal =  SoundLevel().from_signal(signal)
-        new_signal = new_signal.from_array(freq_data,1)
-        return new_signal
-    
