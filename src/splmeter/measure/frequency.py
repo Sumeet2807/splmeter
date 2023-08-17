@@ -1,19 +1,18 @@
-from numpy import array as ndarray
 from scipy.fft import fft, fftfreq
 from scipy.stats import binned_statistic
 import numpy as np
+from splmeter.base import BaseModule, BaseSignal
+from splmeter.signal import SoundPressure, SoundLevel
 
-from typing import Any
-
-def tofrequencydomain(signal,sample_rate):
-        # start_sample = start*sample_rate
+def tofrequencydomain(signal,fs):
+        # start_sample = start*fs
         spectrum = []
 
-        for a in range(sample_rate,signal.shape[0]+1,sample_rate):
+        for a in range(fs,signal.shape[0]+1,fs):
              
-            b = a - sample_rate
+            b = a - fs
             yf = fft(signal[b:a])
-            N = sample_rate
+            N = fs
             yf = 2.0/N * np.abs(yf[0:N//2])
 
             spectrum.append(yf)
@@ -22,28 +21,30 @@ def tofrequencydomain(signal,sample_rate):
 
 
         # for i in range(duration):
-        #     a = start_sample + (i*sample_rate)
-        #     b = a + sample_rate
+        #     a = start_sample + (i*fs)
+        #     b = a + fs
         #     if b > signal.shape[0]:
         #         break
         #     yf = fft(signal[a:b])
-        #     N = sample_rate
+        #     N = fs
         #     yf = 2.0/N * np.abs(yf[0:N//2])
 
         #     spectrum.append(yf)
 
         
-        T = 1/sample_rate
-        frequencies = fftfreq(sample_rate, T)[:sample_rate//2]
+        T = 1/fs
+        frequencies = fftfreq(fs, T)[:fs//2]
         return np.array(spectrum),frequencies
 
 def log_rms(data):
     return(np.sqrt(np.sum(np.square(data))))
 
 
-class OneThirdOctave():
+class OneThirdOctave(BaseModule):
 
     def __init__(self,reference_pressure = 2.0e-5):
+        self.name = 'One-Third Octave'
+        self.parameters['Reference Pressure'] = reference_pressure
         self.reference_pressure = reference_pressure
         # self.processings = processing
         self.bins = [
@@ -116,14 +117,20 @@ class OneThirdOctave():
                             16000,
                             20000,
                             ]
+        
 
-    def __call__(self, signal: ndarray, sample_rate: int) -> Any:
+
+    def process(self, signal: BaseSignal) -> BaseSignal:
     
         # for processing in self.processings:
         #     signal = processing(signal)
+        if not isinstance(signal, SoundPressure):
+             raise Exception('Unsupported signal type. Supported type - splmeter.signal.SoundPressure')
 
-        spectrum, frequencies = tofrequencydomain(signal,sample_rate)
+        spectrum, frequencies = tofrequencydomain(signal.amplitude,signal.fs)
         bin_stats, bin_edges, binnumber = binned_statistic(frequencies,spectrum,statistic=log_rms,bins=self.bins)
         freq_data = (20*np.log10(bin_stats/self.reference_pressure)).T
-        return freq_data
+        new_signal =  SoundLevel().from_signal(signal)
+        new_signal = new_signal.from_array(freq_data,1)
+        return new_signal
     
