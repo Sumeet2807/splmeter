@@ -3,13 +3,13 @@ from splmeter.base import BaseSignal
 
 class SoundPressure(BaseSignal):
     def init(self):
-        self.type = 'pressure(Pa)'
-        self.unit = 'Pa'
+        self.type = 'Pressure(Pa)/Volts(V)'
+        self.unit = 'Pa/V'
 
 
 class SoundLevel(BaseSignal):
     def init(self):        
-        self.type = 'level(dB)'
+        self.type = 'Level(dB)'
         self.unit = 'dB'
 
     

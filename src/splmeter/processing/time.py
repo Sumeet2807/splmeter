@@ -3,16 +3,16 @@ from splmeter.base import BaseModule, BaseSignal
 
 
 class VoltToSPL(BaseModule):
-    def __init__(self,mic_sensitivity):
+    def init(self,mic_sensitivity):
         self.ms = mic_sensitivity
         self.name = 'Voltage to SPL'
-        self.parameters['Mic Sensitivity']
-    def __call__(self,signal):
+        self.parameters['Mic Sensitivity'] = self.ms
+    def process(self,signal):
         signal.amplitude = signal.amplitude/self.ms
         return signal
     
 
-class Resampler():
+class Resampler(BaseModule):
     def __init__(self,new_fs):
         self.new_fs = new_fs
         

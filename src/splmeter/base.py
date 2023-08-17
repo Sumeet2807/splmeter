@@ -27,8 +27,8 @@ class BaseSignal():
         op = Operation()
         op.name = 'Origin'
         op.parameters['Signal Type'] = self.type
-        op.parameters['Signal Length(s)'] = self.amplitude.shape[0]/self.fs
-        op.parameters['Sample Frequency'] = fs
+        op.parameters['Signal Length(s)'] = self.amplitude.shape[-1]/self.fs
+        op.parameters['Sample Frequency'] = self.fs
         self.register_ops(op)
         return self
 
@@ -47,6 +47,15 @@ class BaseSignal():
         self.ops = signal.ops
         return self
 
+    def print_ops(self):
+        for op in self.ops:
+            print(op.name,op.parameters)
+        op = Operation()
+        op.name = 'End'
+        op.parameters['Signal Type'] = self.type
+        op.parameters['Signal Length(s)'] = self.amplitude.shape[-1]/self.fs
+        op.parameters['Sample Frequency'] = self.fs
+        print(op.name,op.parameters)
 
 
 class BaseModule():
