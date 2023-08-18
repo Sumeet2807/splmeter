@@ -33,7 +33,7 @@ class OneThirdOctave(BaseModule):
         self.reference_pressure = reference_pressure
         self.bins = OneThirdOctaveBins        
         self.bin_names = OneThirdOctaveBinNames
-        
+        self.register_supported_signal_type(SoundPressure)
 
 
     def process(self, signal):

@@ -48,36 +48,38 @@ class BaseSignal():
         return self
 
     def print_ops(self):
-        for op in self.ops:
+        
+        for op in self.get_ops():
             print(op.name,op.parameters)
+
+    
+    def get_ops(self):
+        ops_copy = self.ops.copy()
         op = Operation()
         op.name = 'End'
         op.parameters['Signal Type'] = self.type
         op.parameters['Signal Length(s)'] = self.amplitude.shape[-1]/self.fs
         op.parameters['Sample Frequency'] = self.fs
-        print(op.name,op.parameters)
+        ops_copy.append(op)
+        return ops_copy
+
+
 
 
 class BaseModule():
 
     def __init__(self,*args,**kwargs):
         self.name = 'Module'
+        self.supported_signal_types = []
         self.parameters = {}
         return self.init(*args,**kwargs)
 
 
     def __call__(self,signal:BaseSignal):
-
+        if not self.__signal_type_is_supported__(signal):
+            raise Exception('Unsupported signal type. Supported signal types - %s' % (str(self.supported_signal_types)))
         signal = self.process(signal)
         self.__register_to_signal__(signal)
-        return signal
-        
-
-    def init(self,*args,**kwargs):
-        pass
-
-    def process(self,signal:BaseSignal):
-        #override
         return signal
     
 
@@ -86,3 +88,21 @@ class BaseModule():
         op.name = self.name
         op.parameters = self.parameters
         signal.register_ops(op)
+        
+    def __signal_type_is_supported__(self,signal):
+        if len(self.supported_signal_types):
+            for signal_type in self.supported_signal_types:
+                if isinstance(signal,signal_type):
+                    return True                
+            return False
+        return True
+    
+    def register_supported_signal_type(self,signal_type):
+        self.supported_signal_types.append(signal_type)
+    
+    def init(self,*args,**kwargs):
+        pass
+
+    def process(self,signal:BaseSignal):
+        #override
+        return signal

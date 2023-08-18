@@ -124,6 +124,7 @@ class FrequencyWeight(BaseModule):
             raise Exception('Unsupported weighting type')
         self.name = 'Frequency Weighting'
         self.parameters['Weighting Type'] = weighting_type
+        self.register_supported_signal_type(SoundPressure)
 
     def process(self,signal):
         sos = self.weight_fn(signal.fs,output='sos')

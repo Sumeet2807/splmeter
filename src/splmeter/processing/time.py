@@ -1,5 +1,6 @@
 import numpy as np
 from splmeter.base import BaseModule, BaseSignal
+from splmeter.signal import SoundLevel,SoundPressure
 
 
 class VoltToSPL(BaseModule):
@@ -7,27 +8,31 @@ class VoltToSPL(BaseModule):
         self.ms = mic_sensitivity
         self.name = 'Voltage to SPL'
         self.parameters['Mic Sensitivity'] = self.ms
+        self.register_supported_signal_type(SoundPressure)
     def process(self,signal):
         signal.amplitude = signal.amplitude/self.ms
         return signal
     
 
 class Resampler(BaseModule):
-    def __init__(self,new_fs):
-        self.new_fs = new_fs
+    def init(self,fs):
+        self.new_fs = fs
+        self.name = 'Resampler'
+        self.parameters['Sample rate'] = self.new_fs
         
 
-    def __call__(self, signal, fs):
-        # if fs < self.new_fs:
-        #     raise Exception('new sample rate cannot be higher than source sample rate')
-        sample_times = np.arange(0,self.new_fs*int(signal.shape[0]/fs))/(self.new_fs*int(signal.shape[0]/fs))
-        sample_indices = np.floor(sample_times*signal.shape[0]).astype(np.int64)
-        return np.take(signal,sample_indices), self.new_fs
+    def process(self, signal):
+
+        sample_times = np.arange(0,self.new_fs*int(signal.amplitude.shape[0]/signal.fs))/(self.new_fs*int(signal.amplitude.shape[0]/signal.fs))
+        sample_indices = np.floor(sample_times*signal.amplitude.shape[0]).astype(np.int64)
+        signal.amplitude = np.take(signal.amplitude,sample_indices)
+        signal.fs = self.new_fs
+        return signal 
         
 
 
-class TimeWeight():
-    def __init__(self,integration_window,integration_time=0,type='Fast',timeconstant=0.125,reference_pressure=2e-5):
+class TimeWeight(BaseModule):
+    def init(self,integration_window,integration_time=0,type='Fast',timeconstant=0.125,reference_pressure=2e-5):
         if type == 'Fast':
             self.timeconstant = 0.125
         elif type == 'Slow':
@@ -41,27 +46,60 @@ class TimeWeight():
         self.integration_window = integration_window
         self.integration_time = integration_time
 
-    def __call__(self,signal,fs):
+        self.name = 'Time Weighting'
+        self.parameters['Weighting type'] = type
+        self.parameters['Timeconstant'] = self.timeconstant
+        self.parameters['Integration Window(s)'] = self.integration_window
+        self.parameters['Compute every n seconds'] = self.integration_time
+        self.parameters['Reference Pressure'] = self.rp
+        self.register_supported_signal_type(SoundPressure)
+    # def __call__(self,signal,fs):
 
-        integration_window_index_size = int(fs*self.integration_window)
-        integration_time_index_size = int(fs*self.integration_time)
+    #     integration_window_index_size = int(fs*self.integration_window)
+    #     integration_time_index_size = int(fs*self.integration_time)
+    #     if integration_time_index_size <= 0:
+    #         integration_time_index_size = 1
+    #     start_index = integration_window_index_size
+
+        
+    #     signal=np.concatenate([np.array([0]*integration_window_index_size),signal],axis=0)
+    #     # if start_index >= signal.shape[0]:
+    #     #     raise Exception('Not enough samples in signal for the specified sample rate, integration window & time')
+    #     # print('generating indices')
+    #     indices = [np.arange(x-integration_window_index_size,x) for x in range(start_index,signal.shape[0],integration_time_index_size)]
+    #     exponential_term = np.exp(-1*(np.arange(integration_window_index_size-1,-1,-1)/fs)/self.timeconstant)[np.newaxis,...]
+    #     # print('generated indices')
+    #     summation_array = np.take(np.square(signal),indices)*exponential_term
+
+
+    #     return 10*np.log10((np.sum(summation_array,axis=1)/fs)/(self.timeconstant*(self.rp**2)))
+    #     # return summation_array
+
+
+
+
+    def process(self,signal):
+
+        integration_window_index_size = int(signal.fs*self.integration_window)
+        integration_time_index_size = int(signal.fs*self.integration_time)
         if integration_time_index_size <= 0:
             integration_time_index_size = 1
         start_index = integration_window_index_size
 
         
-        signal=np.concatenate([np.array([0]*integration_window_index_size),signal],axis=0)
+        temp_amplitude =np.concatenate([np.array([0]*integration_window_index_size),signal.amplitude],axis=0)
         # if start_index >= signal.shape[0]:
         #     raise Exception('Not enough samples in signal for the specified sample rate, integration window & time')
         # print('generating indices')
-        indices = [np.arange(x-integration_window_index_size,x) for x in range(start_index,signal.shape[0],integration_time_index_size)]
-        exponential_term = np.exp(-1*(np.arange(integration_window_index_size-1,-1,-1)/fs)/self.timeconstant)[np.newaxis,...]
-        # print('generated indices')
-        summation_array = np.take(np.square(signal),indices)*exponential_term
+        indices = [np.arange(x-integration_window_index_size,x) for x in range(start_index,temp_amplitude.shape[0],integration_time_index_size)]
+        exponential_term = np.exp(-1*(np.arange(integration_window_index_size-1,-1,-1)/signal.fs)/self.timeconstant)[np.newaxis,...]
+        summation_array = np.take(np.square(temp_amplitude),indices)*exponential_term
 
+        new_amplitude = 10*np.log10((np.sum(summation_array,axis=1)/signal.fs)/(self.timeconstant*(self.rp**2)))
 
-        return 10*np.log10((np.sum(summation_array,axis=1)/fs)/(self.timeconstant*(self.rp**2)))
-        # return summation_array
+        new_signal = SoundLevel().from_signal(signal,new_amplitude,1/self.integration_time)
+
+        return new_signal
 
 
 
