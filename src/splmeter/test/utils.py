@@ -1,9 +1,13 @@
 import csv
+from pathlib import Path
+path = Path("../data/test.csv").parent
 
-
-def get_tolerance_dict_from_csv(filename):
+def get_tolerance_dict_from_csv(csvpath):
     tolerance_dict  ={}
-    with open(filename) as csv_file:
+    base_path = Path(__file__).parent
+    file_path = (base_path / csvpath).resolve()
+
+    with open(file_path) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         
         for i, row in enumerate(csv_reader):
