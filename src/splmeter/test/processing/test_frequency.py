@@ -11,8 +11,8 @@ import numpy as np
 
 class Test_frequency_weighting():
 
-    _TOLERANCE_FILE_NAME_ = 'C:/Users/Sumeet/Desktop/Projects/splmeter/src/splmeter/test/data/frequency_weigting_tolerance_AC.csv'
-
+    # _TOLERANCE_FILE_RELATIVE_PATH_ = 'C:/Users/Sumeet/Desktop/Projects/splmeter/src/splmeter/test/data/frequency_weigting_tolerance_AC.csv'
+    _TOLERANCE_FILE_RELATIVE_PATH_ = 'data/frequency_weigting_tolerance_AC.csv'   #path is relative to test folder
 
     def _get_white_noise(self):
         fs = 48000
@@ -26,7 +26,7 @@ class Test_frequency_weighting():
 
     def _weighting_test(self,type='A',iec_class='class1'):
 
-        tolerance_dict = get_tolerance_dict_from_csv(self._TOLERANCE_FILE_NAME_)
+        tolerance_dict = get_tolerance_dict_from_csv(self._TOLERANCE_FILE_RELATIVE_PATH_)
         self.noise_arr, self.noise_fs = self._get_white_noise()
         
         sig = SoundPressure().from_array(0.5*self.noise_arr, self.noise_fs)
