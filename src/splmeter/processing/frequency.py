@@ -1,53 +1,52 @@
 import numpy as np
-from scipy.signal import zpk2tf,lfilter, bilinear 
-from numpy import pi, polymul
+from scipy.signal import zpk2tf,bilinear_zpk 
 from numpy import pi
 from scipy.signal import zpk2tf, zpk2sos, freqs, sosfilt
-from splmeter.base import BaseModule, BaseSignal
-from splmeter.signal import SoundPressure, SoundLevel
+from splmeter.base import BaseModule
+from splmeter.signal import SoundPressure
 import numpy as np
 
 
-def _relative_degree(z, p):
-    """
-    Return relative degree of transfer function from zeros and poles
-    """
-    degree = len(p) - len(z)
-    if degree < 0:
-        raise ValueError("Improper transfer function. "
-                         "Must have at least as many poles as zeros.")
-    else:
-        return degree
-def _zpkbilinear(z, p, k, fs):
+# def _relative_degree(z, p):
+#     """
+#     Return relative degree of transfer function from zeros and poles
+#     """
+#     degree = len(p) - len(z)
+#     if degree < 0:
+#         raise ValueError("Improper transfer function. "
+#                          "Must have at least as many poles as zeros.")
+#     else:
+#         return degree
+# def _zpkbilinear(z, p, k, fs):
     
-    z = np.atleast_1d(z)
-    p = np.atleast_1d(p)
+#     z = np.atleast_1d(z)
+#     p = np.atleast_1d(p)
 
-    degree = _relative_degree(z, p)
+#     degree = _relative_degree(z, p)
 
-    fs2 = 2.0*fs
+#     fs2 = 2.0*fs
 
-    # Bilinear transform the poles and zeros
-    z_z = (fs2 + z) / (fs2 - z)
-    p_z = (fs2 + p) / (fs2 - p)
+#     # Bilinear transform the poles and zeros
+#     z_z = (fs2 + z) / (fs2 - z)
+#     p_z = (fs2 + p) / (fs2 - p)
 
-    # Any zeros that were at infinity get moved to the Nyquist frequency
-    z_z = np.append(z_z, -np.ones(degree))
+#     # Any zeros that were at infinity get moved to the Nyquist frequency
+#     z_z = np.append(z_z, -np.ones(degree))
 
-    # Compensate for gain change
-    k_z = k * np.real(np.prod(fs2 - z) / np.prod(fs2 - p))
+#     # Compensate for gain change
+#     k_z = k * np.real(np.prod(fs2 - z) / np.prod(fs2 - p))
 
-    return z_z, p_z, k_z
-
-
+#     return z_z, p_z, k_z
 
 
-__all__ = ['ABC_weighting', 'A_weighting', 'A_weight']
+
+
+# __all__ = ['ABC_weighting', 'A_weighting', 'A_weight']
 
 
 def ABC_weighting(curve):
    
-    if curve not in 'ABC':
+    if curve not in 'AC':
         raise ValueError('Curve type not understood')
 
     z = [0, 0]
@@ -65,10 +64,11 @@ def ABC_weighting(curve):
         z.append(0)
 
     elif curve == 'C':
-        p = [-0.062*pi*20.598997057568145,-0.062*pi*20.598997057568145,
-         -0.062*pi*12194.21714799801,-0.062*pi*12194.21714799801]
         
-        
+        p = [-2*pi*20.598997057568145,
+         -2*pi*20.598997057568145,
+         -2*pi*12194.21714799801,
+         -2*pi*12194.21714799801]
         
         
     b, a = zpk2tf(z, p, k)
@@ -85,7 +85,8 @@ def A_weighting(fs, output='ba'):
     z, p, k = ABC_weighting('A')
 
     # Use the bilinear transformation to get the digital filter.
-    z_d, p_d, k_d = _zpkbilinear(z, p, k, fs)
+    # z_d, p_d, k_d = _zpkbilinear(z, p, k, fs)
+    z_d, p_d, k_d = bilinear_zpk(z, p, k, fs)
 
     if output == 'zpk':
         return z_d, p_d, k_d
@@ -100,7 +101,8 @@ def C_weighting(fs, output='ba'):
     z, p, k = ABC_weighting('C')
 
     # Use the bilinear transformation to get the digital filter.
-    z_d, p_d, k_d = _zpkbilinear(z, p, k, fs)
+    # z_d, p_d, k_d = _zpkbilinear(z, p, k, fs)
+    z_d, p_d, k_d = bilinear_zpk(z, p, k, fs)
 
     if output == 'zpk':
         return z_d, p_d, k_d
@@ -128,5 +130,6 @@ class FrequencyWeight(BaseModule):
 
     def process(self,signal):
         sos = self.weight_fn(signal.fs,output='sos')
-        signal.amplitude = sosfilt(sos, signal.amplitude)
-        return signal
+        amplitude = sosfilt(sos, signal.amplitude)
+        new_signal =  SoundPressure().from_signal(signal,amplitude,signal.fs)
+        return new_signal

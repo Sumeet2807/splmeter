@@ -32,7 +32,7 @@ class OneThirdOctave(BaseModule):
         self.parameters['Reference Pressure'] = reference_pressure
         self.reference_pressure = reference_pressure
         self.bins = OneThirdOctaveBins        
-        self.bin_names = OneThirdOctaveBinNames
+        self.bin_names = OneThirdOctaveBinCentral
         self.register_supported_signal_type(SoundPressure)
 
 
@@ -88,7 +88,7 @@ OneThirdOctaveBins = [
                     22390
                     ]
 
-OneThirdOctaveBinNames = [
+OneThirdOctaveBinCentral = [
                             16,
                             20,
                             25,
