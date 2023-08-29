@@ -29,7 +29,7 @@ class Test_frequency_weighting():
         tolerance_dict = get_tolerance_dict_from_csv(self._TOLERANCE_FILE_RELATIVE_PATH_)
         self.noise_arr, self.noise_fs = self._get_white_noise()
         
-        sig = SoundPressure().from_array(0.5*self.noise_arr, self.noise_fs)
+        sig = SoundPressure().from_array(self.noise_arr, self.noise_fs)
         oto = OneThirdOctave()
         fw = FrequencyWeight(type)
         sig_fw = fw(sig)
