@@ -17,9 +17,9 @@ class Test_octave():
         for i, freq in enumerate(selected_frequency):
             noise_amp[random_indices[i]] += random_multiplier
             if noise_arr is None:
-                noise_arr = random_multiplier*np.cos((2*np.pi*freq)*(np.arange(0,fs)/48000))
+                noise_arr = random_multiplier*np.cos((2*np.pi*int(freq))*(np.arange(0,fs)/48000))
                 continue
-            noise_arr += random_multiplier*np.cos((2*np.pi*freq)*(np.arange(0,fs)/48000))
+            noise_arr += random_multiplier*np.cos((2*np.pi*int(freq))*(np.arange(0,fs)/48000))
         noise_arr_db = 20*np.log10(noise_amp/self._REFERENCE_PRESSURE)
         return noise_arr, fs, np.clip(noise_arr_db,0,None)
 
@@ -28,9 +28,9 @@ class Test_octave():
         noise_arr = None
         for freq in OneThirdOctaveBinCentral:
             if noise_arr is None:
-                noise_arr = np.sin((2*np.pi*freq)*(np.arange(0,fs)/48000))
+                noise_arr = np.cos((2*np.pi*int(freq))*(np.arange(0,fs)/48000))
                 continue
-            noise_arr += np.sin((2*np.pi*freq)*(np.arange(0,fs)/48000))
+            noise_arr += np.cos((2*np.pi*int(freq))*(np.arange(0,fs)/48000))
         noise_arr_db = 20*np.log10(np.ones((len(OneThirdOctaveBinCentral)))/self._REFERENCE_PRESSURE)
         return noise_arr, fs, np.clip(noise_arr_db,0,None)
     
