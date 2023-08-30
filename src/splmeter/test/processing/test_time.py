@@ -14,7 +14,7 @@ class Test_time_weighting():
         noise_arr[:int(fs*dur/2)] = np.cos((2*np.pi*freq)*(np.arange(0,fs*dur/2)/48000))
         return noise_arr, fs
 
-    def Test_4khz_response_fast(self):
+    def test_4khz_response_fast(self):
         dur = 20
         noise_arr,fs = self._get_4khz_step_signal(dur)
         sig_noise = SoundPressure().from_array(noise_arr,fs)
@@ -27,7 +27,7 @@ class Test_time_weighting():
         assert delta/2 >= 25
 
 
-    def Test_4khz_response_slow(self):
+    def test_4khz_response_slow(self):
         dur = 20
         noise_arr,fs = self._get_4khz_step_signal(dur)
         sig_noise = SoundPressure().from_array(noise_arr,fs)
