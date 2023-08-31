@@ -1,6 +1,15 @@
 import numpy as np
+import copy
 from splmeter.base import BaseModule, BaseSignal
 from splmeter.signal import SoundLevel,SoundPressure
+
+def resample(sig_arr,input_fs,output_fs):
+        dur = sig_arr.shape[0]/input_fs
+        n_output_samples = int(output_fs*dur)
+        sample_times = np.arange(0,n_output_samples)/n_output_samples
+        sample_indices = np.floor(sample_times*sig_arr.shape[0]).astype(np.int64)
+        sig_arr = np.take(sig_arr,sample_indices)
+        return sig_arr, output_fs
 
 
 class VoltToSPL(BaseModule):
@@ -22,14 +31,12 @@ class Resampler(BaseModule):
         
 
     def process(self, signal):
-
-        sample_times = np.arange(0,self.new_fs*int(signal.amplitude.shape[0]/signal.fs))/(self.new_fs*int(signal.amplitude.shape[0]/signal.fs))
-        sample_indices = np.floor(sample_times*signal.amplitude.shape[0]).astype(np.int64)
-        signal.amplitude = np.take(signal.amplitude,sample_indices)
-        signal.fs = self.new_fs
-        return signal 
-        
-
+        new_signal = signal.copy()
+        new_sig_arr,fs = resample(new_signal.amplitude,new_signal.fs,self.new_fs)
+        new_signal.amplitude = new_sig_arr
+        new_signal.fs = fs
+        return new_signal
+    
 
 class TimeWeight(BaseModule):
     def init(self,integration_window,integration_time=0,type='Fast',timeconstant=0.125,reference_pressure=2e-5):

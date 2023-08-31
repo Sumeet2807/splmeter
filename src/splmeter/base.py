@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 class Operation():
     def __init__(self):
@@ -16,6 +17,9 @@ class BaseSignal():
         self.unit = None
         self.ops = []
         return self.init(*args,**kwargs)
+    
+    def copy(self):
+        return copy.deepcopy(self)
 
     def init(self,*args,**kwargs):
         pass
