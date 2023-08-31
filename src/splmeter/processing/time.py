@@ -39,7 +39,7 @@ class Resampler(BaseModule):
     
 
 class TimeWeight(BaseModule):
-    def init(self,integration_window,integration_time=0,type='Fast',timeconstant=0.125,reference_pressure=2e-5):
+    def init(self,integration_window,integration_time=1,type='Fast',timeconstant=0.125,reference_pressure=2e-5):
         if type == 'Fast':
             self.timeconstant = 0.125
         elif type == 'Slow':
