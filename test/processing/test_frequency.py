@@ -1,6 +1,6 @@
 from splmeter.processing.frequency import FrequencyWeight
 from splmeter.measure.frequency import OneThirdOctaveBinCentral
-from splmeter.test.utils import get_tolerance_dict_from_csv
+from test.utils import get_tolerance_dict_from_csv
 from splmeter.signal import SoundPressure
 from splmeter.measure.frequency import OneThirdOctave 
 import numpy as np
