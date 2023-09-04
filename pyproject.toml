@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "splmeter"
-version = "0.0.1a"
+version = "0.0.1-alpha"
 authors = [
-  { name="Sumeet", email="sumeet2807a@gmail.com" },
+  { name="Sumeet", email="s.saini@ufl.edu" },
 ]
 description = "SPLMeter"
 readme = "README.md"
