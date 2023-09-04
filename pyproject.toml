@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "splmeter"
-version = "0.0.1"
+version = "0.0.1a"
 authors = [
   { name="Sumeet", email="sumeet2807a@gmail.com" },
 ]
