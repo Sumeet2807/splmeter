@@ -19,9 +19,9 @@ class Test_frequency_weighting():
         noise_arr = None
         for freq in OneThirdOctaveBinCentral:
             if noise_arr is None:
-                noise_arr = np.sin((2*np.pi*freq)*(np.arange(0,fs)/48000))
+                noise_arr = np.sin((2*np.pi*int(freq))*(np.arange(0,fs)/48000))
                 continue
-            noise_arr += np.sin((2*np.pi*freq)*(np.arange(0,fs)/48000))
+            noise_arr += np.sin((2*np.pi*int(freq))*(np.arange(0,fs)/48000))
         return noise_arr, fs
 
     def _weighting_test(self,type='A',iec_class='class1'):
