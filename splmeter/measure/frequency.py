@@ -37,7 +37,6 @@ class OneThirdOctave(BaseModule):
 
 
     def process(self, signal):
-    
         # for processing in self.processings:
         #     signal = processing(signal)
         if not isinstance(signal, SoundPressure):
