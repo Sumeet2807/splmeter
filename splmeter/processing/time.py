@@ -79,7 +79,7 @@ class TimeWeight(BaseModule):
 
         new_amplitude = 10*np.log10((np.sum(summation_array,axis=1)/signal.fs)/(self.timeconstant*(self.rp**2)))
 
-        new_signal = SoundLevel().from_signal(signal,new_amplitude,1/self.integration_time)
+        new_signal = SoundLevel().from_signal(signal,new_amplitude,1/(max(self.integration_time,(1/signal.fs))))
 
         return new_signal
 
