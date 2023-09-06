@@ -82,6 +82,7 @@ class BaseModule():
     def __call__(self,signal:BaseSignal):
         if not self.__signal_type_is_supported__(signal):
             raise Exception('Unsupported signal type. Supported signal types - %s' % (str(self.supported_signal_types)))
+        signal = signal.copy()
         signal = self.process(signal)
         self.__register_to_signal__(signal)
         return signal

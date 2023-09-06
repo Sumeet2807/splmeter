@@ -31,7 +31,7 @@ class Resampler(BaseModule):
         
 
     def process(self, signal):
-        new_signal = signal.copy()
+        new_signal = signal
         new_sig_arr,fs = resample(new_signal.amplitude,new_signal.fs,self.new_fs)
         new_signal.amplitude = new_sig_arr
         new_signal.fs = fs
@@ -60,33 +60,8 @@ class TimeWeight(BaseModule):
         self.parameters['Compute every n seconds'] = self.integration_time
         self.parameters['Reference Pressure'] = self.rp
         self.register_supported_signal_type(SoundPressure)
-    # def __call__(self,signal,fs):
-
-    #     integration_window_index_size = int(fs*self.integration_window)
-    #     integration_time_index_size = int(fs*self.integration_time)
-    #     if integration_time_index_size <= 0:
-    #         integration_time_index_size = 1
-    #     start_index = integration_window_index_size
-
-        
-    #     signal=np.concatenate([np.array([0]*integration_window_index_size),signal],axis=0)
-    #     # if start_index >= signal.shape[0]:
-    #     #     raise Exception('Not enough samples in signal for the specified sample rate, integration window & time')
-    #     # print('generating indices')
-    #     indices = [np.arange(x-integration_window_index_size,x) for x in range(start_index,signal.shape[0],integration_time_index_size)]
-    #     exponential_term = np.exp(-1*(np.arange(integration_window_index_size-1,-1,-1)/fs)/self.timeconstant)[np.newaxis,...]
-    #     # print('generated indices')
-    #     summation_array = np.take(np.square(signal),indices)*exponential_term
-
-
-    #     return 10*np.log10((np.sum(summation_array,axis=1)/fs)/(self.timeconstant*(self.rp**2)))
-    #     # return summation_array
-
-
-
 
     def process(self,signal):
-
         integration_window_index_size = int(signal.fs*self.integration_window)
         integration_time_index_size = int(signal.fs*self.integration_time)
         if integration_time_index_size <= 0:
@@ -104,7 +79,7 @@ class TimeWeight(BaseModule):
 
         new_amplitude = 10*np.log10((np.sum(summation_array,axis=1)/signal.fs)/(self.timeconstant*(self.rp**2)))
 
-        new_signal = SoundLevel().from_signal(signal,new_amplitude,1/self.integration_time)
+        new_signal = SoundLevel().from_signal(signal,new_amplitude,1/(max(self.integration_time,(1/signal.fs))))
 
         return new_signal
 
