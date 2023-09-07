@@ -16,7 +16,7 @@ def get_tolerance_dict_from_csv(csvpath):
             tolerance_dict[float(row[0])] = {'A':float(row[1]),
                                         'C':float(row[2]),
                                         'class1':[float(row[4]),float(row[3])],
-                                        'class2':[float(row[4]),float(row[3])]
+                                        'class2':[float(row[6]),float(row[5])]
 
                                         }
     

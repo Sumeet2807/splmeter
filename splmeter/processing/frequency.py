@@ -7,44 +7,7 @@ from splmeter.signal import SoundPressure
 import numpy as np
 
 
-# def _relative_degree(z, p):
-#     """
-#     Return relative degree of transfer function from zeros and poles
-#     """
-#     degree = len(p) - len(z)
-#     if degree < 0:
-#         raise ValueError("Improper transfer function. "
-#                          "Must have at least as many poles as zeros.")
-#     else:
-#         return degree
-# def _zpkbilinear(z, p, k, fs):
-    
-#     z = np.atleast_1d(z)
-#     p = np.atleast_1d(p)
-
-#     degree = _relative_degree(z, p)
-
-#     fs2 = 2.0*fs
-
-#     # Bilinear transform the poles and zeros
-#     z_z = (fs2 + z) / (fs2 - z)
-#     p_z = (fs2 + p) / (fs2 - p)
-
-#     # Any zeros that were at infinity get moved to the Nyquist frequency
-#     z_z = np.append(z_z, -np.ones(degree))
-
-#     # Compensate for gain change
-#     k_z = k * np.real(np.prod(fs2 - z) / np.prod(fs2 - p))
-
-#     return z_z, p_z, k_z
-
-
-
-
-# __all__ = ['ABC_weighting', 'A_weighting', 'A_weight']
-
-
-def ABC_weighting(curve):
+def AC_weighting(curve):
    
     if curve not in 'AC':
         raise ValueError('Curve type not understood')
@@ -82,7 +45,7 @@ def ABC_weighting(curve):
 
 def A_weighting(fs, output='ba'):
    
-    z, p, k = ABC_weighting('A')
+    z, p, k = AC_weighting('A')
 
     # Use the bilinear transformation to get the digital filter.
     # z_d, p_d, k_d = _zpkbilinear(z, p, k, fs)
@@ -98,7 +61,7 @@ def A_weighting(fs, output='ba'):
         raise ValueError("'%s' is not a valid output form." % output)
         
 def C_weighting(fs, output='ba'):
-    z, p, k = ABC_weighting('C')
+    z, p, k = AC_weighting('C')
 
     # Use the bilinear transformation to get the digital filter.
     # z_d, p_d, k_d = _zpkbilinear(z, p, k, fs)

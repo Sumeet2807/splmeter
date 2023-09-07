@@ -18,7 +18,7 @@ class Leq(BaseModule):
         self.register_supported_signal_type(SoundPressure)
 
     def process(self,signal):
-
+        
         self.output_resolution = max(self.output_resolution, 1/signal.fs)
         
         if self.max_input_fs < signal.fs:
@@ -64,7 +64,6 @@ class Lmax(BaseModule):
     
     def process(self,signal):
 
-        signal = signal.copy()
         input_fs = signal.fs
         sig_arr = signal.amplitude
         compute_window_index_size = int(input_fs*self.compute_window)
@@ -105,7 +104,6 @@ class Lpeak(BaseModule):
     
     def process(self,signal):
 
-        signal = signal.copy()
         input_fs = signal.fs
         sig_arr = signal.amplitude
         compute_window_index_size = int(input_fs*self.compute_window)
