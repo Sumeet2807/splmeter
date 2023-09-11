@@ -1,4 +1,0 @@
-numpy==1.21.6
-plotly==5.15.0
-schemdraw==0.15
-scipy==1.7.3
