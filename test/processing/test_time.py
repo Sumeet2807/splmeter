@@ -1,6 +1,5 @@
 import numpy as np
-from splmeter.base import BaseModule, BaseSignal
-from splmeter.signal import SoundLevel,SoundPressure
+from splmeter.signal import SoundPressure
 from splmeter.processing.time import TimeWeight
 
 
@@ -46,19 +45,19 @@ class Test_time_weighting():
         noise_arr,fs = self._get_4khz_step_signal(dur,fs)
         sig_noise = SoundPressure().from_array(noise_arr,fs)
 
-        tw = TimeWeight(integration_window=1,integration_time=1)
+        tw = TimeWeight(integration_window=1,output_resolution=1)
         sig_noise_tw = tw(sig_noise)
         assert abs(sig_noise_tw.fs - 1) <= 1 
 
-        tw = TimeWeight(integration_window=1,integration_time=0.1)
+        tw = TimeWeight(integration_window=1,output_resolution=0.1)
         sig_noise_tw = tw(sig_noise)
         assert abs(sig_noise_tw.fs - 10) <= 1 
 
-        tw = TimeWeight(integration_window=1,integration_time=0)
+        tw = TimeWeight(integration_window=1,output_resolution=0)
         sig_noise_tw = tw(sig_noise)
         assert abs(sig_noise_tw.fs - fs) <= 1 
 
-        tw = TimeWeight(integration_window=1,integration_time=2)
+        tw = TimeWeight(integration_window=1,output_resolution=2)
         sig_noise_tw = tw(sig_noise)
         assert abs(sig_noise_tw.fs - 0.5) <= 0.1 
 
