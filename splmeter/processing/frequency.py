@@ -8,6 +8,17 @@ import numpy as np
 
 
 def AC_weighting(curve):
+    """_summary_
+
+    Args:
+        curve (char): type of weighting
+
+    Raises:
+        ValueError: Unsupported weighting curve
+
+    Returns:
+        _type_: curve filter transfer function
+    """
    
     if curve not in 'AC':
         raise ValueError('Curve type not understood')
@@ -80,7 +91,17 @@ def C_weighting(fs, output='ba'):
 
 
 class FrequencyWeight(BaseModule):
+    """Derives frequency weighted sound pressure signal
+    """
     def init(self,weighting_type='A'):
+        """_summary_
+
+        Args:
+            weighting_type (str, optional): Weighting type to use. Must be in [A,C]. Defaults to 'A'.
+
+        Raises:
+            Exception: Unsupported weighting type
+        """
         if weighting_type == 'A':
             self.weight_fn = A_weighting
         elif weighting_type == 'C':
@@ -92,6 +113,14 @@ class FrequencyWeight(BaseModule):
         self.register_supported_signal_type(SoundPressure)
 
     def process(self,signal):
+        """_summary_
+
+        Args:
+            signal (SoundPressure): Sound Pressure signal instance
+
+        Returns:
+            SoundPressure: Sound Pressure signal instance
+        """
         sos = self.weight_fn(signal.fs,output='sos')
         amplitude = sosfilt(sos, signal.amplitude)
         new_signal =  SoundPressure().from_signal(signal,amplitude,signal.fs)
