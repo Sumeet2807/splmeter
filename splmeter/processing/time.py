@@ -80,7 +80,7 @@ class Resampler(BaseModule):
 class TimeWeight(BaseModule):
     """Applies time weighting to a signal
     """
-    def init(self,integration_window,output_resolution=1,type='Fast',timeconstant=0.125,max_input_fs=1000,reference_pressure=2e-5):        
+    def init(self,integration_window,output_resolution=1, type='Fast',timeconstant=0.125,start_time=0,max_input_fs=1000,reference_pressure=2e-5):        
         """Init
 
         Args:
@@ -105,6 +105,7 @@ class TimeWeight(BaseModule):
         self.integration_window = integration_window
         self.output_resolution = output_resolution
         self.max_input_fs = max_input_fs
+        self.start_time = start_time
         self.name = 'Time Weighting'
         self.parameters['Weighting type'] = type
         self.parameters['Timeconstant'] = self.timeconstant
@@ -129,26 +130,29 @@ class TimeWeight(BaseModule):
         if self.max_input_fs < signal.fs:
             resampler = Resampler(self.max_input_fs)
             signal = resampler(signal) 
+        input_fs = signal.fs
+        sig_arr = signal.amplitude
 
 
-        integration_window_index_size = int(signal.fs*self.integration_window)
-        integration_time_index_size = int(signal.fs*self.output_resolution)
+        integration_window_index_size = int(input_fs*self.integration_window)
+        integration_time_index_size = int(input_fs*self.output_resolution)
         if integration_time_index_size <= 0:
             integration_time_index_size = 1
-        start_index = integration_window_index_size
+        start_index = self.start_time*input_fs
+        buffer = max(0,(integration_window_index_size - start_index))
+        start_index += buffer
 
-        
-        temp_amplitude =np.concatenate([np.array([0]*integration_window_index_size),signal.amplitude],axis=0)
+        sig_arr=np.concatenate([np.array([0]*buffer),sig_arr],axis=0)
         # if start_index >= signal.shape[0]:
         #     raise Exception('Not enough samples in signal for the specified sample rate, integration window & time')
         # print('generating indices')
-        indices = [np.arange(x-integration_window_index_size,x) for x in range(start_index,temp_amplitude.shape[0],integration_time_index_size)]
-        exponential_term = np.exp(-1*(np.arange(integration_window_index_size-1,-1,-1)/signal.fs)/self.timeconstant)[np.newaxis,...]
-        summation_array = np.take(np.square(temp_amplitude),indices)*exponential_term
+        indices = [np.arange(x-integration_window_index_size,x) for x in range(start_index,sig_arr.shape[0],integration_time_index_size)]
+        exponential_term = np.exp(-1*(np.arange(integration_window_index_size-1,-1,-1)/input_fs)/self.timeconstant)[np.newaxis,...]
+        summation_array = np.take(np.square(sig_arr),indices)*exponential_term
 
-        new_amplitude = 10*np.log10((np.sum(summation_array,axis=1)/signal.fs)/(self.timeconstant*(self.rp**2)))
+        new_amplitude = 10*np.log10((np.sum(summation_array,axis=1)/input_fs)/(self.timeconstant*(self.rp**2)))
 
-        new_signal = SoundLevel().from_signal(signal,new_amplitude,1/(max(self.output_resolution,(1/signal.fs))))
+        new_signal = SoundLevel().from_signal(signal,new_amplitude,1/(max(self.output_resolution,(1/input_fs))))
 
         return new_signal
 

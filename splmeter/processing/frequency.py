@@ -93,7 +93,7 @@ def C_weighting(fs, output='ba'):
 class FrequencyWeight(BaseModule):
     """Derives frequency weighted sound pressure signal
     """
-    def init(self,weighting_type='A'):
+    def init(self,weighting_type='A',start_time=0):
         """_summary_
 
         Args:
@@ -111,6 +111,7 @@ class FrequencyWeight(BaseModule):
         self.name = 'Frequency Weighting'
         self.parameters['Weighting Type'] = weighting_type
         self.register_supported_signal_type(SoundPressure)
+        self.start_time = start_time
 
     def process(self,signal):
         """_summary_
@@ -121,7 +122,8 @@ class FrequencyWeight(BaseModule):
         Returns:
             SoundPressure: Sound Pressure signal instance
         """
+        start_index = self.start_time*signal.fs
         sos = self.weight_fn(signal.fs,output='sos')
-        amplitude = sosfilt(sos, signal.amplitude)
+        amplitude = sosfilt(sos, signal.amplitude[start_index:])
         new_signal =  SoundPressure().from_signal(signal,amplitude,signal.fs)
         return new_signal

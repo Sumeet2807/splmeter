@@ -8,7 +8,7 @@ class Leq(BaseModule):
 
     """
 
-    def init(self, averaging_window, output_resolution=1, max_input_fs=1000, reference_pressure = 2.0e-5):
+    def init(self, averaging_window, output_resolution=1, start_time=0, max_input_fs=1000, reference_pressure = 2.0e-5):
         """Init
 
         Args:
@@ -26,6 +26,7 @@ class Leq(BaseModule):
         self.parameters['Output resolution']=output_resolution
         self.parameters['Max input sampling rate'] = max_input_fs
         self.parameters['Reference Pressure'] = reference_pressure
+        self.start_time = start_time
         self.register_supported_signal_type(SoundPressure)
 
     def process(self,signal):
@@ -52,9 +53,11 @@ class Leq(BaseModule):
         averaging_window_step_size = int(input_fs*self.output_resolution)
         if averaging_window_step_size <= 0:
             averaging_window_step_size = 1
-        start_index = averaging_window_index_size
+        start_index = self.start_time*input_fs
+        buffer = max(0,(averaging_window_index_size - start_index))
+        start_index += buffer
 
-        sig_arr=np.concatenate([np.array([0]*averaging_window_index_size),sig_arr],axis=0)
+        sig_arr=np.concatenate([np.array([0]*buffer),sig_arr],axis=0)
 
         # if start_index >= sig_arr.shape[0]:
         #     raise Exception('Not enough samples in signal for the specified sample rate, integration window & time')
@@ -75,7 +78,7 @@ class Lmax(BaseModule):
 
     """
      
-    def init(self, compute_window, output_resolution=1):
+    def init(self, compute_window, output_resolution=1, start_time=0):
         """Init
 
         Args:
@@ -84,6 +87,7 @@ class Lmax(BaseModule):
         """
         self.compute_window = compute_window
         self.output_resolution = output_resolution
+        self.start_time = start_time
         self.name = 'Maximum time-weighted sound level(Lmax)'
         self.parameters['Compute window/time'] = compute_window
         self.parameters['Output resolution'] = output_resolution
@@ -108,9 +112,11 @@ class Lmax(BaseModule):
         compute_window_step_size = int(input_fs*self.output_resolution)
         if compute_window_step_size <= 0:
             compute_window_step_size = 1
-        start_index = compute_window_index_size
+        start_index = self.start_time*input_fs
+        buffer = max(0,(compute_window_index_size - start_index))
+        start_index += buffer
 
-        sig_arr=np.concatenate([np.array([0]*compute_window_index_size),sig_arr],axis=0)
+        sig_arr=np.concatenate([np.array([0]*buffer),sig_arr],axis=0)
 
         # if start_index >= sig_arr.shape[0]:
         #     raise Exception('Not enough samples in signal for the specified sample rate, compute window & time')
@@ -131,7 +137,7 @@ class Lpeak(BaseModule):
 
     """
      
-    def init(self, compute_window, output_resolution=1,max_input_fs=1000,reference_pressure = 2.0e-5):
+    def init(self, compute_window, output_resolution=1, start_time=0, max_input_fs=1000,reference_pressure = 2.0e-5):
         """Init
 
         Args:
@@ -144,6 +150,7 @@ class Lpeak(BaseModule):
         self.output_resolution = output_resolution
         self.rp = reference_pressure
         self.max_input_fs = max_input_fs
+        self.start_time = start_time
         self.name = 'Peak sound level(Lpeak)'
         self.parameters['Compute window/time'] = compute_window
         self.parameters['Output resolution'] = output_resolution
@@ -167,9 +174,11 @@ class Lpeak(BaseModule):
         compute_window_step_size = int(input_fs*self.output_resolution)
         if compute_window_step_size <= 0:
             compute_window_step_size = 1
-        start_index = compute_window_index_size
+        start_index = self.start_time*input_fs
+        buffer = max(0,(compute_window_index_size - start_index))
+        start_index += buffer
 
-        sig_arr=np.concatenate([np.array([0]*compute_window_index_size),sig_arr],axis=0)
+        sig_arr=np.concatenate([np.array([0]*buffer),sig_arr],axis=0)
 
         # if start_index >= sig_arr.shape[0]:
         #     raise Exception('Not enough samples in signal for the specified sample rate, compute window & time')
