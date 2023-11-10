@@ -53,8 +53,8 @@ class Leq(BaseModule):
         averaging_window_step_size = int(input_fs*self.output_resolution)
         if averaging_window_step_size <= 0:
             averaging_window_step_size = 1
-        start_index = self.start_time*input_fs
-        buffer = max(0,(averaging_window_index_size - start_index))
+        start_index = int(self.start_time*input_fs)
+        buffer = int(max(0,(averaging_window_index_size - start_index)))
         start_index += buffer
 
         sig_arr=np.concatenate([np.array([0]*buffer),sig_arr],axis=0)
@@ -112,8 +112,8 @@ class Lmax(BaseModule):
         compute_window_step_size = int(input_fs*self.output_resolution)
         if compute_window_step_size <= 0:
             compute_window_step_size = 1
-        start_index = self.start_time*input_fs
-        buffer = max(0,(compute_window_index_size - start_index))
+        start_index = int(self.start_time*input_fs)
+        buffer = int(max(0,(compute_window_index_size - start_index)))
         start_index += buffer
 
         sig_arr=np.concatenate([np.array([0]*buffer),sig_arr],axis=0)
@@ -174,8 +174,8 @@ class Lpeak(BaseModule):
         compute_window_step_size = int(input_fs*self.output_resolution)
         if compute_window_step_size <= 0:
             compute_window_step_size = 1
-        start_index = self.start_time*input_fs
-        buffer = max(0,(compute_window_index_size - start_index))
+        start_index = int(self.start_time*input_fs)
+        buffer = int(max(0,(compute_window_index_size - start_index)))
         start_index += buffer
 
         sig_arr=np.concatenate([np.array([0]*buffer),sig_arr],axis=0)

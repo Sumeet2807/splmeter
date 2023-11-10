@@ -122,7 +122,7 @@ class FrequencyWeight(BaseModule):
         Returns:
             SoundPressure: Sound Pressure signal instance
         """
-        start_index = self.start_time*signal.fs
+        start_index = int(self.start_time*signal.fs)
         sos = self.weight_fn(signal.fs,output='sos')
         amplitude = sosfilt(sos, signal.amplitude[start_index:])
         new_signal =  SoundPressure().from_signal(signal,amplitude,signal.fs)
