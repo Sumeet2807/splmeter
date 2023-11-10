@@ -73,7 +73,7 @@ class OneThirdOctave(BaseModule):
         #     signal = processing(signal)
         if not isinstance(signal, SoundPressure):
              raise Exception('Unsupported signal type. Supported type - splmeter.signal.SoundPressure')
-
+        
         spectrum, frequencies = tofrequencydomain(signal.amplitude,signal.fs)
         bin_stats, bin_edges, binnumber = binned_statistic(frequencies,spectrum,statistic=rss,bins=self.bins)
         freq_data = (20*np.log10(bin_stats/self.reference_pressure)).T
