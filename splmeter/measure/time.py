@@ -131,6 +131,63 @@ class Lmax(BaseModule):
 
         return new_signal
 
+class Lmin(BaseModule):
+    """Calculates min sound pressure level for a given signal.
+
+    """
+     
+    def init(self, compute_window, output_resolution=1, start_time=0):
+        """Init
+
+        Args:
+            compute_window (float): window size to consider for finding min
+            output_resolution (int, optional): Output will be calculated every n seconds. Defaults to 1.
+        """
+        self.compute_window = compute_window
+        self.output_resolution = output_resolution
+        self.start_time = start_time
+        self.name = 'minimum time-weighted sound level(Lmin)'
+        self.parameters['Compute window/time'] = compute_window
+        self.parameters['Output resolution'] = output_resolution
+        self.register_supported_signal_type(SoundLevel)
+
+
+    
+    def process(self,signal):
+        """Process
+
+        Args:
+            signal (SoundPressure): Sound pressure level instance to be processed
+
+
+        Returns:
+            SoundLevel: Sound level instance
+        """
+        self.output_resolution = max(self.output_resolution, 1/signal.fs)
+        input_fs = signal.fs
+        sig_arr = signal.amplitude
+        compute_window_index_size = int(input_fs*self.compute_window)
+        compute_window_step_size = int(input_fs*self.output_resolution)
+        if compute_window_step_size <= 0:
+            compute_window_step_size = 1
+        start_index = int(self.start_time*input_fs)
+        buffer = int(max(0,(compute_window_index_size - start_index)))
+        start_index += buffer
+
+        sig_arr=np.concatenate([np.array([0]*buffer),sig_arr],axis=0)
+
+        # if start_index >= sig_arr.shape[0]:
+        #     raise Exception('Not enough samples in signal for the specified sample rate, compute window & time')
+        
+    
+        indices = [np.arange(x-compute_window_index_size,x) for x in range(start_index,sig_arr.shape[0],compute_window_step_size)]
+        compute_array = np.take(sig_arr,indices)
+        new_sig_arr = np.min(compute_array,axis=1)
+        new_signal = SoundLevel().from_signal(signal)
+        new_signal.amplitude = new_sig_arr
+        new_signal.fs = 1/self.output_resolution
+
+        return new_signal
 
 class Lpeak(BaseModule):
     """Calculates peak sound pressure signal for a given signal.
