@@ -96,6 +96,8 @@ class TimeWeight(BaseModule):
             self.timeconstant = 0.125
         elif type == 'Slow':
             self.timeconstant = 1
+        elif type == "Impulse":
+            self.timeconstant = 0.035
         elif type == 'Custom':
             self.timeconstant = timeconstant
         else:
