@@ -89,7 +89,7 @@ class Lmax(BaseModule):
         self.rp = reference_pressure
         self.max_input_fs = max_input_fs
         self.start_time = start_time
-        self.name = 'Peak sound level(Lpeak)'
+        self.name = 'Maximum sound level(Lmax)'
         self.parameters['Compute window/time'] = compute_window
         self.parameters['Output resolution'] = output_resolution
         self.parameters['Reference Pressure'] = reference_pressure
@@ -150,7 +150,7 @@ class Lmin(BaseModule):
         self.rp = reference_pressure
         self.max_input_fs = max_input_fs
         self.start_time = start_time
-        self.name = 'Peak sound level(Lpeak)'
+        self.name = 'Minimum sound level(Lmin)'
         self.parameters['Compute window/time'] = compute_window
         self.parameters['Output resolution'] = output_resolution
         self.parameters['Reference Pressure'] = reference_pressure
